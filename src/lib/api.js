@@ -1,6 +1,6 @@
 import { buildMockResult } from './mockData';
 
-const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:4000/api';
+const API = "https://mern-auth-7mpp.onrender.com/api" || 'http://127.0.0.1:4000/api';
 export const MOCK_MODE = import.meta.env.VITE_MOCK_MODE === 'true';
 
 async function request(path, options = {}) {
