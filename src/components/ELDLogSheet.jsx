@@ -36,6 +36,14 @@ function eventEndHour(event) {
   return clampHour(hourFromDate(event.end));
 }
 
+function formatEventTime(dateTime) {
+  const date = new Date(dateTime);
+
+  return `${String(date.getUTCHours()).padStart(2, "0")}:${String(
+    date.getUTCMinutes()
+  ).padStart(2, "0")}`;
+}
+
 export default function ELDLogSheet({ day }) {
   const canvasRef = useRef(null);
 
@@ -203,30 +211,6 @@ export default function ELDLogSheet({ day }) {
           new Date(b.start)
       );
 
-      console.log(
-        `\n===== DRAWING ELD ${day.date} =====`
-      );
-
-      console.table(
-        events.map((event) => ({
-          type: event.type,
-          label: event.label,
-
-          start: event.start,
-          end: event.end,
-
-          startHour: clampHour(
-            hourFromDate(event.start)
-          ),
-
-          endHour:
-            eventEndHour(event),
-
-          duration:
-            event.duration_hours,
-        }))
-      );
-
     /*
     |--------------------------------------------------------------------------
     | Draw Continuous ELD Line
@@ -257,16 +241,6 @@ export default function ELDLogSheet({ day }) {
       if (endHour <= startHour) {
         return;
       }
-
-      console.log(
-        `[DRAW] ${event.label}`,
-        {
-          type: event.type,
-          startHour,
-          endHour,
-          duration: event.duration_hours,
-        }
-      );
 
       const x1 =
         left +
@@ -364,6 +338,41 @@ export default function ELDLogSheet({ day }) {
           <strong>Status:</strong>{" "}
           Planned schedule
         </span>
+      </div>
+      <div className="eld-events">
+        <h4>Trip Events</h4>
+
+        {(day?.events || [])
+          .filter((event) =>
+            [
+              "Pickup",
+              "Driving",
+              "30-minute driving break",
+              "Fuel",
+              "10-hour reset/rest",
+              "Dropoff",
+            ].includes(event.label)
+          )
+          .map((event, index) => (
+            <div
+              className="eld-event"
+              key={`${event.start}-${event.label}-${index}`}
+            >
+              <span className="eld-event-time">
+                {formatEventTime(event.start)}
+                {" – "}
+                {formatEventTime(event.end)}
+              </span>
+
+              <strong>{event.label}</strong>
+
+              {Number(event.miles) > 0 && (
+                <span className="eld-event-miles">
+                  {Number(event.miles).toFixed(1)} mi
+                </span>
+              )}
+            </div>
+          ))}
       </div>
     </div>
   );
